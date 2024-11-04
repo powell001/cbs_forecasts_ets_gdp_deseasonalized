@@ -18,7 +18,7 @@ pd.set_option('display.max_columns', 40)
 # https://opendata.cbs.nl/statline#/CBS/nl/dataset/84087NED/table?ts=1696490590802
 
 def macro_data_cbs(identifier, verbose = False):
-    start_date = '01/01/1995'
+    start_date = '01/01/1996'
 
     if verbose:
         info = cbsodata.get_info(identifier)
@@ -33,7 +33,7 @@ def macro_data_cbs(identifier, verbose = False):
         data.to_csv("data/tmp_ramdata.csv")
         print(data.Perioden)
 
-    data = data[data["SoortGegevens"] == 'Prijsniveau 2015']
+    data = data[data["SoortGegevens"] == 'Prijsniveau 2015, seizoengecorrigeerd']
     data = data[data['Perioden'].str.contains('kwartaal')]
     data.index = pd.date_range(start = start_date, periods = data.shape[0], freq = "Q").to_period('Q')
 
@@ -51,7 +51,8 @@ def macro_data_cbs(identifier, verbose = False):
     return gdp_total
 
 NLD_basic_macro_data = macro_data_cbs(identifier = '84105NED', verbose = True)
-NLD_basic_macro_data.to_csv("data/cbs_basic_macro_NOT_SEASONCORRECTED_qt.csv")
+NLD_basic_macro_data.to_csv("data/cbs_basic_macro_SEASONCORRECTED_qt.csv")
+
 print("2015, seasonably adjusted")
 print(NLD_basic_macro_data)
 

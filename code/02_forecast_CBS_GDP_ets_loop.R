@@ -35,10 +35,10 @@ library(lmtest)
 ##########################
 
 # load data
-dt1 <- read.csv("data/cbs_basic_macro_NOT_SEASONCORRECTED_qt.csv", sep = ",")
+dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt.csv", sep = ",")
 summary(dt1)
 
-# not appropriate for negative numbers
+# not appropriate for negative numbersw
 drops <- c("change_supply_season")
 dt1 <- dt1[ , !(names(dt1) %in% drops)]
 colnames(dt1)
@@ -139,7 +139,12 @@ modelform <- str_c(c(errortype, trendtype, seasontype), collapse = "")
 
 fit <- ets(series1, model=modelform, damped=FALSE)
 
-h1 <- 2
+############
+# test period
+#############
+test_period <- 4
+
+h1 <- test_period
 train <- head(series1, round(length(series1) - h1))
 test <- tail(series1, h1)
 
