@@ -80,7 +80,7 @@ if (is.numeric(p_value) == FALSE) {
   print("assume: Has Trend")
   trendtype <- "A"
 } else {
-     if (p_value > 0.05) {
+     if (p_value < 0.05) { ############################# CHECK THIS ######################
       print("Has Trend")
       trendtype <- "A"
     } else {
@@ -152,7 +152,7 @@ fit <- ets(train, model=modelform, damped=FALSE)
 forecasted1 <- forecast(fit, h=h1)
 
 png(filename=paste("output/figures/", Key1, "TrainTestForecast.png", sep = "_"))
-print(autoplot(forecasted1, include=h1+16) + autolayer(test) + ggtitle(colName))
+print(autoplot(forecasted1, series = "In-sample Forecast", include=h1+16) + autolayer(test, series = "Historical Data") + ggtitle(colName)) + ylab("Historical + Forecast")
 dev.off()
 
 ####################
@@ -162,7 +162,7 @@ fit <- ets(series1, model=modelform, damped=FALSE)
 forecast_oneMonth <- forecast(fit, h=1)
 
 png(filename=paste("output/figures/", Key1, "final_forecasts.png", sep = "_"))
-print(autoplot(tail(series1, 9)) + autolayer(forecast_oneMonth) + ggtitle(colName))
+print(autoplot(tail(series1, 20)) + autolayer(forecast_oneMonth) + ggtitle(colName))
 dev.off()
 
 ################################

@@ -18,7 +18,7 @@ pd.set_option('display.max_columns', 40)
 # https://opendata.cbs.nl/statline#/CBS/nl/dataset/84087NED/table?ts=1696490590802
 
 def macro_data_cbs(identifier, verbose = False):
-    start_date = '01/01/1996'
+    start_date = '01/01/1995'
 
     if verbose:
         info = cbsodata.get_info(identifier)
