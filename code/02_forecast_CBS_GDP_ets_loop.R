@@ -35,14 +35,15 @@ library(lmtest)
 ##########################
 
 # load data
-dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt.csv", sep = ",")
+dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_09.csv", sep = ",")
 summary(dt1)
 
-# not appropriate for negative numbersw
-drops <- c("change_supply_season")
-dt1 <- dt1[ , !(names(dt1) %in% drops)]
-colnames(dt1)
-dim(dt1)
+# remove files
+do.call(file.remove, list(list.files("output/forecasts", full.names = TRUE)))
+do.call(file.remove, list(list.files("output/figures", full.names = TRUE)))
+
+# not appropriate for negative numbers
+# dt1 <- dt1[ , !(names(dt1) %in% drops)]
 
 allColumns <- colnames(dt1)
 
@@ -50,8 +51,9 @@ allColumns <- colnames(dt1)
 allColumns_1 <- allColumns[c(-1)]
 
 ##########################
+# FOR LOOP
 ##########################
-##########################
+
 for(colName in allColumns_1){ 
 
 #colName <- "gdp_total_season"
@@ -61,81 +63,93 @@ print(colName)
 Key1 <- paste(Sys.Date(), "_", colName, sep="")
 
 series1 <- ts(dt1[colName], frequency = 4, start=c(1995,1))
-series1 <- na.omit(series1)
 
-plot(series1)
+# if all values negative, go to next value
+if (sum(is.na(series1)) > 50) {next}
 
-#########################
-# Which model to use
-#########################
+# drop nas, date will remain the same
+series1 <- na.omit(series1, cex.main = 6, col.main = "darkgreen")
 
-###########################
-# Trend or not?
-###########################
+plot(series1, main = colName)
 
-p_value <- try(notrend_test(series1)$p.value)
-print(p_value)
+# check if series contains negative numbers
+if (any(as.numeric(series1) < 0)) {
+  modelform <- "AAA"
+  print("Data contains negative numbers")
 
-if (is.numeric(p_value) == FALSE) {
-  print("assume: Has Trend")
-  trendtype <- "A"
 } else {
-     if (p_value < 0.05) { ############################# CHECK THIS ######################
-      print("Has Trend")
-      trendtype <- "A"
-    } else {
-      print("No Trend")
-      trendtype <- "N"
-      }
-}
 
-print(trendtype)
 
-###########################
-# Additive or multiplictive?
-###########################
+#########################
+  # Which model to use
+  #########################
 
-decompose_series1 <- decompose(series1, "multiplicative")
-decompose_series1_multiplicative <- decompose_series1$random
-muladd_mul <- sqrt(mean(abs(decompose_series1_multiplicative)^2, na.rm=TRUE))
+  ###########################
+  # Trend or not?
+  ###########################
 
-decompose_series1 <- decompose(series1, "additive")
-decompose_series1_additive <- decompose_series1$random
-muladd_add <- sqrt(mean(abs(decompose_series1_additive)^2, na.rm=TRUE))
+  p_value <- try(notrend_test(series1)$p.value)
+  print(p_value)
 
-if (muladd_mul < muladd_add) {
-  print("Use Multiplicative")
-  errortype <- "M"
+  if (is.numeric(p_value) == FALSE) {
+    print("assume: Has Trend")
+    trendtype <- "A"
   } else {
-    print("Use Additive")
-    errortype <- "A"
-}
-
-print(errortype)
-
-###########################
-# Seasonnal or not
-###########################
-
-season_Check <- isSeasonal(series1)
-
-if (season_Check == TRUE) {
-  print("Use Seasonal")
-  seasontype <- "A"
-  } else {
-    print ("Use Non-Seasonal")
-    seasontype <- "N"
+      if (p_value < 0.05) { ############################# CHECK THIS ######################
+        print("Has Trend")
+        trendtype <- "A"
+      } else {
+        print("No Trend")
+        trendtype <- "N"
+        }
   }
 
-print(seasontype)
+  print(trendtype)
 
-# error, trend, season
+  ###########################
+  # Additive or multiplictive?
+  ###########################
 
-# First letter is the error type:     A, M or Z
-# Second letter is the trend type:    N, A, M, Z
-# Third letter is the season type:    N, A, M, Z
+  decompose_series1 <- decompose(series1, "multiplicative")
+  decompose_series1_multiplicative <- decompose_series1$random
+  muladd_mul <- sqrt(mean(abs(decompose_series1_multiplicative)^2, na.rm=TRUE))
 
-modelform <- str_c(c(errortype, trendtype, seasontype), collapse = "")
+  decompose_series1 <- decompose(series1, "additive")
+  decompose_series1_additive <- decompose_series1$random
+  muladd_add <- sqrt(mean(abs(decompose_series1_additive)^2, na.rm=TRUE))
+
+  if (muladd_mul < muladd_add) {
+    print("Use Multiplicative")
+    errortype <- "M"
+    } else {
+      print("Use Additive")
+      errortype <- "A"
+  }
+
+  print(errortype)
+
+  ###########################
+  # Seasonnal or not
+  ###########################
+
+  season_Check <- isSeasonal(series1)
+
+  if (season_Check == TRUE) {
+    print("Use Seasonal")
+    seasontype <- "A"
+    } else {
+      print ("Use Non-Seasonal")
+      seasontype <- "N"
+    }
+
+  print(seasontype)
+
+  modelform <- str_c(c(errortype, trendtype, seasontype), collapse = "")
+  } # end if for negative numbers
+
+###############
+# above, if negative numbers use simple method
+###############
 
 fit <- ets(series1, model=modelform, damped=FALSE)
 
@@ -183,7 +197,6 @@ data <- data.frame(
 data$Key1 <- Key1
 
 colnames(data) <- c("SeriesName", "DateAnalysis", "ETSmodel", "ObservationDate", "RawData", "Key1")
-
 write.table(data, file = paste("output/forecasts/", Key1, "RawData.csv", sep="_"), sep =",",row.names = FALSE)
 
 ###
@@ -209,80 +222,4 @@ write.table(finalForecast, file = paste("output/forecasts/", Key1, "final_foreca
 ############# END LOOP ##############
 ############# END LOOP ##############
 
-##############################
-# Possible analyses
-##############################
 
-###
-# Combine all forecasts
-###
-
-files <- list.files("output/forecasts" , pattern = "final_forecasts.*\\.csv$", full.names = TRUE)
-initial_df <- read.csv(files[1])
-
-# Merge data frames using a loop
-for (fl in files[2:length(files)]) {
-  file_df <- read.csv(fl)
-  initial_df <- rbind(initial_df, file_df)
-}
-# View the merged data frame
-print(initial_df)
-write.table(initial_df, file = "output/analyses/combined_final_forecasts.csv", sep =",",row.names = FALSE)
-
-###
-# Combine point forecast + entire series 
-###
-
-files_Raw <- list.files("output/forecasts" , pattern = "RawData.*\\.csv$", full.names = TRUE)
-files_FinalForecasts <- list.files("output/forecasts" , pattern = "final_forecasts.*\\.csv$", full.names = TRUE)
-
-###################################
-###################################
-###################################
-index <- 0
-for(fl in files_Raw) {
-
-index <- index + 1
-
-print(index)
-
-# get raw data
-firstfile <- files_Raw[index]
-initial_df_raw <- read.csv(firstfile)
-tmp_raw <- initial_df_raw[,c(4,5)]
-
-series_name <- initial_df_raw[,c(1)][1]
-
-# get final forecasts
-firstfile <- files_FinalForecasts[index]
-initial_df_finalfore <- read.csv(firstfile)
-tmp_forecast <- initial_df_finalfore[,c(1,2)]
-
-# copy column names
-colnames(tmp_forecast) <- colnames(tmp_raw)
-combined <- rbind(tmp_raw, tmp_forecast)
-
-# change to proper date
-#combined$ObservationDate <- as.Date(paste(1, combined$ObservationDate), '%d %B %Y')
-
-# colors for different parts of line
-combined$mycolors <- c(rep('hist', length(combined[,1])-2), rep(c('forecast'),2))
-combined$mycolors <- as.factor(combined$mycolors)
-combined$ObservationDate <- as.Date(as.yearqtr(combined$ObservationDate), frac = 0)
-
-png(filename=paste("output/figures/", series_name, "series_and_forecast.png", sep = "_"))
-print(ggplot(combined, aes(x = ObservationDate, y = RawData, col = mycolors, group = 1)) + geom_line())
-dev.off()
-
-###
-# Combine point forecast + entire series (using data above)
-###
-combined$seriesDifferenced <- combined['RawData'] - lag(combined['RawData'], 4)
-combined$seriesDifferenced <- unlist(combined$seriesDifferenced)
-
-
-png(filename=paste("output/figures/", series_name, "differenced_forecasts.png", sep = "_"))
-plot(ts(combined[,c(2,4)], frequency = 4, start=c(1995,1)), main=series_name)
-dev.off()
-
-}
