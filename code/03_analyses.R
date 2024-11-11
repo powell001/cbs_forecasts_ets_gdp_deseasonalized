@@ -24,7 +24,7 @@ library(lubridate)
 ##############################
 
 # unprocessed data
-rawDataFile <- "data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_09.csv"
+rawDataFile <- "data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_11.csv"
 
 # remove files
 do.call(file.remove, list(list.files("output/analyses", full.names = TRUE)))
