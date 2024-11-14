@@ -36,6 +36,7 @@ def macro_data_cbs(identifier, verbose = False):
         print(data.Perioden)
 
     data = data[data["SoortGegevens"] == 'Prijsniveau 2021, seizoengecorrigeerd']
+
     data = data[data['Perioden'].str.contains('kwartaal')]
     data.index = pd.date_range(start = start_date, periods = data.shape[0], freq = "Q").to_period('Q')
 
@@ -55,9 +56,10 @@ def macro_data_cbs(identifier, verbose = False):
 
 NLD_basic_macro_data = macro_data_cbs(identifier = '85879NED', verbose = True)
 NLD_basic_macro_data.to_csv("data/cbs_basic_macro_SEASONCORRECTED_qt_" + todayDate + ".csv")
+NLD_basic_macro_data.to_csv("output/analyses/cbs_basic_macro_SEASONCORRECTED_qt_" + todayDate + ".csv")
 
 
-print("2015, seasonably adjusted")
+print("2021, seasonably adjusted")
 print(NLD_basic_macro_data)
 
 NLD_basic_macro_data.plot()

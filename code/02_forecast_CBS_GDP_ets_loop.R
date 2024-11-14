@@ -35,7 +35,7 @@ library(lmtest)
 ##########################
 
 # load data
-dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_11.csv", sep = ",")
+dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_14.csv", sep = ",")
 summary(dt1)
 
 # remove files
@@ -157,6 +157,7 @@ fit <- ets(series1, model=modelform, damped=FALSE)
 # test period
 #############
 test_period <- 4
+horizon <- 1
 
 h1 <- test_period
 train <- head(series1, round(length(series1) - h1))
@@ -173,7 +174,7 @@ dev.off()
 # final forecast
 ####################
 fit <- ets(series1, model=modelform, damped=FALSE)
-forecast_oneMonth <- forecast(fit, h=1)
+forecast_oneMonth <- forecast(fit, h=horizon)
 
 png(filename=paste("output/figures/", Key1, "final_forecasts.png", sep = "_"))
 print(autoplot(tail(series1, 20)) + autolayer(forecast_oneMonth) + ggtitle(colName))
@@ -210,7 +211,7 @@ write.table(forecast_tibble, file = paste("output/forecasts/", Key1, "TrainTestF
 ###
 # finalForecast
 ###
-forecast_oneMonth <- forecast(fit, h=1)
+forecast_oneMonth <- forecast(fit, h=horizon)
 finalForecast <- as.data.frame(forecast_oneMonth, row.names = NULL)
 finalForecast$Key1 <- Key1
 finalForecast <- tibble::rownames_to_column(finalForecast, "Forecast_Period")  
