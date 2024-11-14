@@ -18,13 +18,18 @@ library(car)
 library(lmtest)
 library(data.table)
 library(lubridate)
+library(stringr)
+library(zoo)
 
 ##############################
 # Possible analyses
 ##############################
 
+new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_14.csv"
+
+
 # unprocessed data
-rawDataFile <- "data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_14.csv"
+rawDataFile <- paste0("data/", new_data)
 
 # remove files
 do.call(file.remove, list(list.files("output/analyses", full.names = TRUE)))
@@ -289,7 +294,6 @@ fun_bigchanges_absoluteValue_forecastedData()
 # Forecasts, using biggest changers in percentage, rank list of biggest changes last quarter with forecast, remove if missing
 ######################
 
-
 fun_big_Percentagechanges_forecastedData <- function(rawDataFile){ 
 
     # get forecasts from combined_final_forecasts.csv
@@ -344,3 +348,43 @@ fun_big_Percentagechanges_forecastedData <- function(rawDataFile){
 }
 
 fun_big_Percentagechanges_forecastedData(rawDataFile)
+
+
+######################
+# Historical data plus level forecasts
+######################
+
+fun_combine_hist_forecast <- function(){ 
+
+    data <- read.csv(rawDataFile)
+    data$X <- as.Date(data$X)
+    rownames(data) <- data$X
+
+    finalForecasts <- read.csv("output/analyses/combined_final_forecasts.csv")
+    finalForecasts$featureNames <- str_sub(finalForecasts$Key1, 12)
+    finalForecasts$X <- as.Date(as.yearqtr(finalForecasts$Forecast_Period, format = "%Y Q%q"))
+    f1 <- finalForecasts[c('Point.Forecast','featureNames','X')]
+
+    f2 <- f1 |> 
+    pivot_wider(names_from = featureNames, 
+                values_from = Point.Forecast)
+
+    f2 <- as.data.frame(f2)
+    f2 <- f2[names(data)]
+    f3 <- f2[order(f2$X),]
+    rownames(f3) <- f3$X
+
+    replaceThese <- which(is.na(data[nrow(data), ]), arr.ind=TRUE)
+    lastDate <- data[nrow(data), 'X']
+
+    for (i in as.numeric(replaceThese[, 2])) {
+        data[nrow(data), i] <- f3[nrow(f3)-1, i]
+    }
+
+    output1 <- rbind(data, tail(f3,1))
+
+    write.table(output1, file = "output/analyses/historical_forecasts_levels.csv", sep =",",row.names = FALSE)
+
+}
+
+fun_combine_hist_forecast()
