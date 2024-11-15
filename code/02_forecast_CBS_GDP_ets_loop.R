@@ -35,7 +35,7 @@ library(lmtest)
 ##########################
 
 # load data
-dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_14.csv", sep = ",")
+dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_15.csv", sep = ",")
 summary(dt1)
 
 # remove files

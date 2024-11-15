@@ -25,7 +25,7 @@ library(zoo)
 # Possible analyses
 ##############################
 
-new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_14.csv"
+new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_15.csv"
 
 
 # unprocessed data
@@ -257,7 +257,7 @@ fun_bigchanges <- function(){
     output1 <- output1[!grepl("Totaal", output1[['series_name']]),]
 
 
-    write.table(output1, file = "output/analyses/combined_series_hist_forecasts.csv", sep =",",row.names = FALSE)
+    write.table(output1, file = "output/analyses/combined_series_hist_forecasts_differences.csv", sep =",",row.names = FALSE)
 }
 
 fun_bigchanges()
@@ -267,7 +267,7 @@ fun_bigchanges()
 ######################
 
 fun_bigchanges_absoluteValue_forecastedData <- function(){
-    myfile <- "output/analyses/combined_series_hist_forecasts.csv"
+    myfile <- "output/analyses/combined_series_hist_forecasts_differences.csv"
     bigchangers_df <- read.csv(myfile, stringsAsFactors=FALSE)
 
     bigchangers_df <- bigchangers_df[!grepl("Totaal", bigchangers_df$series_name),]
@@ -297,7 +297,7 @@ fun_bigchanges_absoluteValue_forecastedData()
 fun_big_Percentagechanges_forecastedData <- function(rawDataFile){ 
 
     # get forecasts from combined_final_forecasts.csv
-    myfile <- "output/analyses/combined_series_hist_forecasts.csv"
+    myfile <- "output/analyses/combined_series_hist_forecasts_differences.csv"
     df1 <- read.csv(myfile, stringsAsFactors=FALSE)
 
     # get name of varible and forecast (last column)
@@ -383,7 +383,7 @@ fun_combine_hist_forecast <- function(){
 
     output1 <- rbind(data, tail(f3,1))
 
-    write.table(output1, file = "output/analyses/historical_forecasts_levels.csv", sep =",",row.names = FALSE)
+    write.table(output1, file = "output/analyses/combined_historical_forecasts_levels.csv", sep =",",row.names = FALSE)
 
 }
 
