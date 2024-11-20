@@ -37,6 +37,7 @@ def macro_data_cbs(identifier, verbose = False):
 
     data = data[data["SoortGegevens"] == 'Prijsniveau 2021, seizoengecorrigeerd']
 
+
     data = data[data['Perioden'].str.contains('kwartaal')]
     data.index = pd.date_range(start = start_date, periods = data.shape[0], freq = "Q").to_period('Q')
 
