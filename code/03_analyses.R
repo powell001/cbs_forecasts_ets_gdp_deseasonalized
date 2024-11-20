@@ -25,7 +25,7 @@ library(zoo)
 # Possible analyses
 ##############################
 
-new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_15.csv"
+new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_18.csv"
 
 
 # unprocessed data
@@ -388,3 +388,6 @@ fun_combine_hist_forecast <- function(){
 }
 
 fun_combine_hist_forecast()
+
+
+100 * ((238623 - 237780)/237780)
