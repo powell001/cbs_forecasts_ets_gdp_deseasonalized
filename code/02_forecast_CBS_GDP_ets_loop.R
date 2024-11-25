@@ -35,7 +35,7 @@ library(lmtest)
 ##########################
 
 # load data
-dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_18.csv", sep = ",")
+dt1 <- read.csv("data/cbs_basic_macro_SEASONCORRECTED_qt_2024_11_25.csv", sep = ",")
 summary(dt1)
 
 # remove files
@@ -159,12 +159,12 @@ fit <- ets(series1, model=modelform, damped=FALSE)
 test_period <- 4
 horizon <- 1
 
-h1 <- test_period
+
 train <- head(series1, round(length(series1) - h1))
 test <- tail(series1, h1)
 
 fit <- ets(train, model=modelform, damped=FALSE)
-forecasted1 <- forecast(fit, h=h1)
+forecasted1 <- forecast(fit, h=test_period)
 
 png(filename=paste("output/figures/", Key1, "TrainTestForecast.png", sep = "_"))
 print(autoplot(forecasted1, series = "In-sample Forecast", include=h1+16) + autolayer(test, series = "Historical Data") + ggtitle(colName)) + ylab("Historical + Forecast")

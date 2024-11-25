@@ -25,7 +25,7 @@ library(zoo)
 # Possible analyses
 ##############################
 
-new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_18.csv"
+new_data <- "cbs_basic_macro_SEASONCORRECTED_qt_2024_11_25.csv"
 
 
 # unprocessed data
@@ -340,8 +340,6 @@ fun_big_Percentagechanges_forecastedData <- function(rawDataFile){
     output1 <- output1[!duplicated(output1[, c(lastCol-1, lastCol)]),]
 
     output2 <- output1[!grepl("Totaal", output1[['Row.names']]),]
-
-  
 
     write.table(output2, file = "output/analyses/forecasts_changes_percentageChange.csv", sep =",",row.names = FALSE)
 
